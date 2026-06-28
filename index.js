@@ -31,6 +31,10 @@ function log(msg) {
   console.log(`[${new Date().toISOString()}] ${msg}`);
 }
 
+function delay(ms) {
+  return new Promise(r => setTimeout(r, ms));
+}
+
 function loadPosted() {
   try { return JSON.parse(fs.readFileSync(TRACKING_FILE, 'utf8')); }
   catch { return {}; }
@@ -69,7 +73,7 @@ async function callZen(messages) {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      model: process.env.ZEN_MODEL || 'deepseek-v4-flash-free',
+      model: process.env.ZEN_MODEL || 'deepseek-v4-flash',
       messages
     })
   });
@@ -276,6 +280,7 @@ async function cycle() {
       if (!topic || posted[topic]) continue;
 
       log(`→ ${t.topic} (${t.traffic})`);
+      await delay(1500);
 
       try {
         const intent = await analyzeIntent(t.topic);
@@ -286,12 +291,14 @@ async function cycle() {
 
           let products = [];
           try {
+            await delay(1500);
             products = await findProducts(t.topic, intent.category);
             log(`  Produk: ${products.map(p => p.name).join(', ')}`);
           } catch (err) {
             log(`  Produk: gagal (${err.message})`);
           }
 
+          await delay(1500);
           const html = await generateArticle(t.topic, keywords, intent.primary_intent, products);
           const title = extractTitle(html);
           const content = extractContent(html);
@@ -329,6 +336,6 @@ async function cycle() {
 }
 
 log('Auto Blogger 24/7 started');
-log(`Interval: ${INTERVAL_MS / 60000} menit, Model: ${process.env.ZEN_MODEL || 'deepseek-v4-flash-free'}`);
+log(`Interval: ${INTERVAL_MS / 60000} menit, Model: ${process.env.ZEN_MODEL || 'deepseek-v4-flash'}`);
 cycle();
 setInterval(cycle, INTERVAL_MS);
