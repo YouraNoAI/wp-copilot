@@ -1,0 +1,6 @@
+{
+  "name": "auto-blogger",
+  "version": "1.0.0",
+  "description": "Auto-blogger: Google Trends -> Zen AI -> WordPress",
+  "main": "index.js"
+}
